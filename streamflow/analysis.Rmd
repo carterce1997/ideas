@@ -1,0 +1,55 @@
+---
+title: "Stream Flow"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+
+segment_area_width_method <- function(diameter, width) {
+  
+  theta <- 2 * asin(width / diameter)
+  area <-  .5 * (diameter / 2) ^ 2 * (theta - sin(theta))
+  
+  return(area)
+  
+}
+```
+
+```{r}
+time <-
+  read_xlsx('data.xlsx', sheet = 'measurement_time')
+
+segment_area <-
+  read_xlsx('data.xlsx', sheet = 'segment_width') %>% 
+  mutate(area_in2 = segment_area_width_method(diameter_in, width_in)) %>% 
+  group_by(id) %>% 
+  summarize(area_ft2 = mean(area_in2) * (1 / 12) ^ 2) %>% 
+  ungroup()
+
+transit_time <-
+  read_xlsx('data.xlsx', sheet = 'transit_time') %>% 
+  filter(instrument == 'orange') %>% 
+  group_by(id) %>% 
+  summarize(time_sec = mean(time_sec)) %>% 
+  ungroup()
+
+transit_distance <-
+  read_xlsx('data.xlsx', sheet = 'transit_distance') 
+```
+
+```{r}
+time %>% 
+  inner_join(segment_area) %>% 
+  inner_join(transit_distance) %>% 
+  inner_join(transit_time) %>% 
+  mutate(
+    flow_ft3_per_sec = area_ft2 * distance_ft / time_sec,
+    flow_ft3_per_min = flow_ft3_per_sec * 60,
+    gal_per_min = flow_ft3_per_min * 7.48
+  )
+```
+
+
+

@@ -1,0 +1,16 @@
+"0","time %>% 
+  inner_join(segment_area) %>% 
+  inner_join(transit_distance) %>% 
+  inner_join(transit_time) %>% 
+  mutate(
+    flow_ft3_per_sec = area_ft2 * distance_ft / time_sec,
+    flow_ft3_per_min = flow_ft3_per_sec * 60,
+    gal_per_min = flow_ft3_per_min * 7.48
+  )
+"
+"2","Joining, by = ""id""
+"
+"2","Joining, by = ""id""
+"
+"2","Joining, by = ""id""
+"
